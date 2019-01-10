@@ -19,6 +19,11 @@
   until: task_result is success
   retries: 10
   delay: 2
+- name: check when apt was last updated
+  stat:
+    path: /var/cache/apt/pkgcache.bin
+    get_checksum: no
+  register: apt_package_cache_stat
 - name: Update cache
   apt:
     update_cache: yes
@@ -26,6 +31,7 @@
   until: task_result is success
   retries: 10
   delay: 2
+  when: ansible_date_time.epoch|float - apt_package_cache_stat.stat.mtime > 86400
 - name: Install python-pip and fuse
   apt:
     name:
@@ -70,11 +76,6 @@
   file:
     state: directory
     path: /etc/monit/scripts
-- name: Debug mounts
-  debug:
-    msg: "{{ item.s3_bucket_path }}"
-  loop: "{{ mounts }}"
-  tags: debug
 - name: Create the start scripts for monit that will mount S3
   template:
     mode: 0744
@@ -92,13 +93,19 @@
     state: unmounted
     path: "{{ item.fs_directory }}" 
   loop: "{{ mounts }}"
+- name: Check if the control files are already present
+  stat:
+    path: "{{ item.fs_directory }}/S3NotMounted"
+  loop: "{{ mounts }}"
+  register: reg_s3notmounted
 - name: Create the file S3NotMounted that will be used to detect when S3 is mounted
   file:
     state: touch
     force: no
     mode: 0444
-    path: "{{ item.fs_directory }}/S3NotMounted"
-  loop: "{{ mounts }}"
+    path: "{{ item.item.fs_directory }}/S3NotMounted"
+  loop: "{{ reg_s3notmounted.results }}"
+  when: not item.stat.exists
 - name: Create the monit config file that will watch over the mount
   template:
     src: yas3fs-user.j2
