@@ -2,34 +2,40 @@
 - name: Check that the variable aws_sns_topic_arn is set
   fail:
    msg: "Variable aws_sns_topic_arn is not set or is empty"
-  when: aws_sns_topic_arn is not defined or aws_sns_topic_arn == '' or aws_sns_topic_arn == None 
+  when: aws_sns_topic_arn is not defined or aws_sns_topic_arn == None 
 - name: Check that the variable aws_sqs_queue_name is set
   fail:
    msg: "Variable aws_sqs_queue_name is not set or is empty"
-  when: aws_sqs_queue_name is not defined or aws_sqs_queue_name == '' or aws_sqs_queue_name == None
+  when: aws_sqs_queue_name is not defined or aws_sqs_queue_name == None
 - name: Check that the variable aws_region is set
   fail:
    msg: "Variable aws_region is not set or is empty"
-  when: aws_region is not defined or aws_region == '' or aws_region == None
+  when: aws_region is not defined or aws_region == None
 - name: Install aptitude
   package:
     name: aptitude
-    state: latest 
-    register: task_result
-    until: task_result is success
-    retries: 10
-    delay: 2
-- name: Update ubuntu
+    state: present
+  register: task_result
+  until: task_result is success
+  retries: 10
+  delay: 2
+- name: Update cache
   apt:
-    name: "*"
-    state: latest
     update_cache: yes
+  register: task_result
+  until: task_result is success
+  retries: 10
+  delay: 2
 - name: Install python-pip and fuse
   apt:
     name:
       - fuse
       - python-pip
-    state: latest
+    state: present 
+  register: task_result
+  until: task_result is success
+  retries: 10
+  delay: 2
 - name: Clone the yas3fs repository
   git:
     repo: https://github.com/danilop/yas3fs.git
@@ -56,6 +62,10 @@
     name:
       - monit
     state: latest
+  register: task_result
+  until: task_result is success
+  retries: 10
+  delay: 2
 - name: Create monit scripts directory
   file:
     state: directory
