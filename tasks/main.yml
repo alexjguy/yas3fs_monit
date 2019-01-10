@@ -15,6 +15,10 @@
   package:
     name: aptitude
     state: latest 
+    register: task_result
+    until: task_result is success
+    retries: 10
+    delay: 2
 - name: Update ubuntu
   apt:
     name: "*"
@@ -30,6 +34,7 @@
   git:
     repo: https://github.com/danilop/yas3fs.git
     dest: /tmp/yas3fs
+    version:  2.3.5
 - name: Install yas3fs
   shell: python setup.py install
   args:
@@ -57,37 +62,37 @@
     path: /etc/monit/scripts
 - name: Debug mounts
   debug:
-    msg: "{{item.s3_bucket_path}}"
+    msg: "{{ item.s3_bucket_path }}"
   loop: "{{ mounts }}"
   tags: debug
 - name: Create the start scripts for monit that will mount S3
   template:
     mode: 0744
     src: start-yas3fs.sh.j2
-    dest: /etc/monit/scripts/start-yas3fs-{{item.user}}-{{item.dir}}.sh
+    dest: /etc/monit/scripts/start-yas3fs-{{ item.user }}-{{ item.dir }}.sh
   loop: "{{ mounts }}"
 - name: Create the stop scripts for monit that will unmount S3
   template:
     mode: 0744
     src: stop-yas3fs.sh.j2
-    dest: /etc/monit/scripts/stop-yas3fs-{{item.user}}-{{item.dir}}.sh
+    dest: /etc/monit/scripts/stop-yas3fs-{{ item.user }}-{{ item.dir }}.sh
   loop: "{{ mounts }}"
 - name: Unmount in order to not create the control files on S3
   mount:
     state: unmounted
-    path: "{{item.fs_directory}}" 
+    path: "{{ item.fs_directory }}" 
   loop: "{{ mounts }}"
 - name: Create the file S3NotMounted that will be used to detect when S3 is mounted
   file:
     state: touch
     force: no
     mode: 0444
-    path: "{{item.fs_directory}}/S3NotMounted"
+    path: "{{ item.fs_directory }}/S3NotMounted"
   loop: "{{ mounts }}"
 - name: Create the monit config file that will watch over the mount
   template:
     src: yas3fs-user.j2
-    dest: /etc/monit/conf.d/yas3fs-{{item.user}}
+    dest: /etc/monit/conf.d/yas3fs-{{ item.user }}
   loop: "{{ mounts }}"
   notify: restart_monit
 - name: Update monit config
