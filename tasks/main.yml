@@ -1,0 +1,88 @@
+
+---
+- name: Install aptitude
+  package:
+    name: aptitude
+    state: latest 
+- name: Update ubuntu
+  apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+- name: Install python-pip and fuse
+  apt:
+    name:
+      - fuse
+      - python-pip
+    state: latest
+- name: Clone the yas3fs repository
+  git:
+    repo: https://github.com/danilop/yas3fs.git
+    dest: /tmp/yas3fs
+- name: Install yas3fs
+  shell: python setup.py install
+  args:
+    chdir: /tmp/yas3fs
+- name: Configure fuse
+  lineinfile:
+    backrefs: yes
+    path: /etc/fuse.conf
+    regexp: '^# user_allow_other'
+    line: 'user_allow_other'
+- name: Allow all to acces the fuse config
+  file:
+    path: /etc/fuse.conf
+    mode: "a+r"
+- name: Install monit
+  apt:
+    name:
+      - monit
+    state: latest
+- name: Create monit scripts directory
+  file:
+    state: directory
+    path: /etc/monit/scripts
+- name: Debug mounts
+  debug:
+    msg: "{{item.s3_bucket_path}}"
+  loop: "{{ mounts }}"
+  tags: debug
+- name: Create the start scripts for monit that will mount S3
+  template:
+    mode: 0744
+    src: start-yas3fs.sh.j2
+    dest: /etc/monit/scripts/start-yas3fs-{{item.user}}-{{item.dir}}.sh
+  loop: "{{ mounts }}"
+- name: Create the stop scripts for monit that will unmount S3
+  template:
+    mode: 0744
+    src: stop-yas3fs.sh.j2
+    dest: /etc/monit/scripts/stop-yas3fs-{{item.user}}-{{item.dir}}.sh
+  loop: "{{ mounts }}"
+- name: Unmount in order to not create the control files on S3
+  mount:
+    state: unmounted
+    path: "{{item.fs_directory}}" 
+  loop: "{{ mounts }}"
+- name: Create the file S3NotMounted that will be used to detect when S3 is mounted
+  file:
+    state: touch
+    force: no
+    mode: 0444
+    path: "{{item.fs_directory}}/S3NotMounted"
+  loop: "{{ mounts }}"
+- name: Create the monit config file that will watch over the mount
+  template:
+    src: yas3fs-user.j2
+    dest: /etc/monit/conf.d/yas3fs-{{item.user}}
+  loop: "{{ mounts }}"
+  notify: restart_monit
+- name: Update monit config
+  blockinfile:
+    marker: "# {mark} added by ansible"
+    path: /etc/monit/monitrc
+    block: |
+      set httpd port 2812 and
+      use address localhost
+      allow localhost
+  notify: restart_monit

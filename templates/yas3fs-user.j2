@@ -1,0 +1,4 @@
+Check file {{item.user}}-{{item.dir}} with path {{item.fs_directory}}/S3NotMounted
+   start program = "/etc/monit/scripts/start-yas3fs-{{item.user}}-{{item.dir}}.sh" 
+   stop program = "/etc/monit/scripts/stop-yas3fs-{{item.user}}-{{item.dir}}.sh" 
+   if exist then restart 

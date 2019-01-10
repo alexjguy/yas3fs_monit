@@ -1,0 +1,9 @@
+---
+aws_sns_topic_arn:
+aws_sqs_queue_name:
+aws_region:
+mounts:
+  - user: user1 
+    dir: dir1 
+    s3_bucket_path: s3://sftp-bucket/dir1
+    fs_directory: /sftp/user1/dir1

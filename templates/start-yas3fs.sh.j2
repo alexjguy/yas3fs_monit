@@ -1,0 +1,4 @@
+#!/bin/bash
+yas3fs {{item.s3_bucket_path}} {{item.fs_directory}} --topic {{ aws_sns_topic_arn }} --queue {{ aws_sqs_queue_name }} --region {{ aws_region }}--nonempty
+sudo chmod 775 {{item.fs_directory}}
+sudo chown -R {{item.user}}.sftpusers {{item.fs_directory}}
