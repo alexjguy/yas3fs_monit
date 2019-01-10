@@ -1,38 +1,55 @@
-Role Name
+Yas3fs Monit
 =========
 
-A brief description of the role goes here.
+An ansible role that mounts S3 buckets locally using yas3fs and after that sets up monit in order to watch for any S3 unmount and mount it back.
+It should be run on an EC2 instance that has an instance profile with S3 rw access attached. If you want to run this on an instance without profile then you need to setup aws cli.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This role can be run on Ubuntu Server. It was tested on Ubuntu 18.06.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+There are several variables that should be set and overriden for this role.
+
+* aws_sns_topic_arn: topicarnhere
+* aws_sqs_queue_name: sqsnamehere
+* aws_region: awsregionhere
+* mounts:
+   - user: user1  
+      dir: dir1  
+      s3_bucket_path: s3://sftp-bucket/dir1  
+      fs_directory: /sftp/user1/dir1  
+ 
+```
+---
+aws_sns_topic_arn: topicarnhere
+aws_sqs_queue_name: sqsnamehere
+aws_region: awsregionhere
+mounts:
+  - user: user1
+    dir: dir1
+    s3_bucket_path: s3://sftp-bucket/dir1
+    fs_directory: /sftp/user1/dir1
+```
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+None
 
 Example Playbook
 ----------------
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: servers
+    - hosts: sftp
       roles:
-         - { role: username.rolename, x: 42 }
+         - { role: alexjgui.yas3fs_monit, tags: yas3fs }
 
 License
 -------
 
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+None
