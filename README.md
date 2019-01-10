@@ -2,6 +2,7 @@ Yas3fs Monit
 =========
 
 An ansible role that mounts S3 buckets locally using yas3fs and after that sets up monit in order to watch for any S3 unmount and mount it back.
+It should be run on an EC2 instance that has an instance profile with S3 rw access attached. If you want to run this on an instance without profile then you need to setup aws cli.
 
 Requirements
 ------------
