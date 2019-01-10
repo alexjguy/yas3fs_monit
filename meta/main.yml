@@ -15,6 +15,6 @@ galaxy_info:
         - bionic
   galaxy_tags:
     - yas3fs
-    - S3
+    - s3
     - monit 
 allow_duplicates: true
