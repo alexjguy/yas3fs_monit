@@ -1,7 +1,7 @@
 ---
-aws_sns_topic_arn:
-aws_sqs_queue_name:
-aws_region:
+aws_sns_topic_arn: topicarnhere
+aws_sqs_queue_name: sqsnamehere
+aws_region: awsregionhere
 mounts:
   - user: user1 
     dir: dir1 

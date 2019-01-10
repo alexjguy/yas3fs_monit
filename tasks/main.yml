@@ -1,5 +1,16 @@
-
 ---
+- name: Check that the variable aws_sns_topic_arn is set
+  fail:
+   msg: "Variable aws_sns_topic_arn is not set or is empty"
+  when: aws_sns_topic_arn is not defined or aws_sns_topic_arn == '' or aws_sns_topic_arn == None 
+- name: Check that the variable aws_sqs_queue_name is set
+  fail:
+   msg: "Variable aws_sqs_queue_name is not set or is empty"
+  when: aws_sqs_queue_name is not defined or aws_sqs_queue_name == '' or aws_sqs_queue_name == None
+- name: Check that the variable aws_region is set
+  fail:
+   msg: "Variable aws_region is not set or is empty"
+  when: aws_region is not defined or aws_region == '' or aws_region == None
 - name: Install aptitude
   package:
     name: aptitude
@@ -23,6 +34,8 @@
   shell: python setup.py install
   args:
     chdir: /tmp/yas3fs
+  register: reg_install_yas3fs
+  changed_when: reg_install_yas3fs.rc != 0
 - name: Configure fuse
   lineinfile:
     backrefs: yes
