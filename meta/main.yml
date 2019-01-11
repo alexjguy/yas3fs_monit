@@ -3,7 +3,11 @@ dependencies: []
 
 galaxy_info:
   author: alexjguy
-  description: An ansible role that mounts S3 buckets locally using yas3fs and after that sets up monit in order to watch for any S3 unmount and mount it back. 
+  description: >
+    An ansible role that mounts S3 buckets
+    locally using yas3fs and after that sets
+    up monit in order to watch for any S3
+    unmount and mount it back.
   company: "AlexJ"
   license: "license (BSD, MIT)"
   min_ansible_version: 2.4
@@ -16,5 +20,5 @@ galaxy_info:
   galaxy_tags:
     - yas3fs
     - s3
-    - monit 
+    - monit
 allow_duplicates: true
